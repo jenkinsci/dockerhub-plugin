@@ -3,9 +3,11 @@ package org.jenkinsci.plugins;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.UnprotectedRootAction;
+import hudson.security.ACL;
 import hudson.util.IOUtils;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.acegisecurity.Authentication;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
@@ -32,24 +34,33 @@ public class DockerHubWebHook implements UnprotectedRootAction {
 
     public void doIndex(StaplerRequest request) throws IOException {
 
-        String remote = parse(request);
+        final String remote = parse(request);
 
-        // seach all jobs for DockerHubTrigger
-        OUTER:
-        for (AbstractProject p : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
-            DockerHubTrigger trigger = (DockerHubTrigger) p.getTrigger(DockerHubTrigger.class);
-            if (trigger == null) continue;
+        ACL.impersonate(ACL.SYSTEM, new Runnable() {
 
-            LOGGER.fine("Inspecting candidate job "+p.getName());
-            for (DockerImageExtractor extractor : Jenkins.getInstance().getExtensionList(DockerImageExtractor.class)) {
-                if (extractor.getDockerImagesUsedByJob(p).contains(remote)) {
-                    LOGGER.info("Schedule job "+p.getName() + " as Docker image " + remote + " has been rebuilt by DockerHub");
-                    p.scheduleBuild2(0, new DockerHubWebHookCause(remote));
-                    continue OUTER;
+            public void run() {
+                // seach all jobs for DockerHubTrigger
+                OUTER:
+                for (AbstractProject p : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+
+                    DockerHubTrigger trigger = (DockerHubTrigger) p.getTrigger(DockerHubTrigger.class);
+                    if (trigger == null) {
+                        LOGGER.fine("job "+p.getName() + " doesn't have DockerHubTrigger set");
+                        continue;
+                    }
+
+                    LOGGER.fine("Inspecting candidate job "+p.getName());
+                    for (DockerImageExtractor extractor : Jenkins.getInstance().getExtensionList(DockerImageExtractor.class)) {
+                        if (extractor.getDockerImagesUsedByJob(p).contains(remote)) {
+                            LOGGER.info("Schedule job "+p.getName() + " as Docker image " + remote + " has been rebuilt by DockerHub");
+                            p.scheduleBuild2(0, new DockerHubWebHookCause(remote));
+                            continue OUTER;
+                        }
+                    }
                 }
-            }
-        }
 
+            }
+        });
     }
 
     private String parse(StaplerRequest req) throws IOException {
@@ -74,7 +85,7 @@ public class DockerHubWebHook implements UnprotectedRootAction {
      */
     private String parse(JSONObject payload) {
         JSONObject repository = payload.getJSONObject("repository");
-        return repository.getString("namespace") + "/" + repository.getString("name");
+        return repository.getString("repo_name");
     }
 
     private static final Logger LOGGER = Logger.getLogger(DockerHubWebHook.class.getName());
