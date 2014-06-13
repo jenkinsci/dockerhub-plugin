@@ -13,6 +13,12 @@
 
   <url>https://trello.com/b/unRZLtCH/dockerhub-plugin</url>
 
+  <scm>
+    <url>https://github.com/jenkinsci/dockerhub-plugin</url>
+    <connection>scm:git:https://github.com/jenkinsci/dockerhub-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/dockerhub-plugin.git</developerConnection>
+  </scm>
+
   <dependencies>
 
   </dependencies>
