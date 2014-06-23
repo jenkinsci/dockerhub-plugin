@@ -31,7 +31,7 @@ public class DockerHubTrigger extends Trigger {
 
         @Override
         public String getDisplayName() {
-            return "Run when a new image is built onDockerHub";
+            return "Run when a new image is built on DockerHub";
         }
     }
 }
