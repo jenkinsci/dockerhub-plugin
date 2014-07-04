@@ -8,7 +8,7 @@
 
   <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>dockerhub</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>hpi</packaging>
 
   <url>https://trello.com/b/unRZLtCH/dockerhub-plugin</url>
@@ -17,6 +17,7 @@
     <url>https://github.com/jenkinsci/dockerhub-plugin</url>
     <connection>scm:git:https://github.com/jenkinsci/dockerhub-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/dockerhub-plugin.git</developerConnection>
+    <tag>dockerhub-1.0</tag>
   </scm>
   
   <build>  
