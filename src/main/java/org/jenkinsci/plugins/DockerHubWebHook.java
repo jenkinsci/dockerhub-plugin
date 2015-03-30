@@ -29,7 +29,7 @@ public class DockerHubWebHook implements UnprotectedRootAction {
     }
 
     public String getUrlName() {
-        return "/dockerhub-webhook";
+        return "dockerhub-webhook";
     }
 
     public void doIndex(StaplerRequest request) throws IOException {
